@@ -6,6 +6,8 @@ from scipy.stats import entropy
 from dahuffman import HuffmanCodec
 import numpy as np
 import random
+from tqdm import tqdm
+from datetime import datetime
 
 from gestionErreur import *
 
@@ -137,105 +139,125 @@ if __name__ == '__main__':
     phrase = getLivre('./The_Adventures_of_Sherlock_Holmes_A_Scandal_In_Bohemia.txt')
     #phrase = getLivre('./livre.txt')
     alphabet = getAlphabet(phrase)
-    # print(f"phrase={phrase}")
-    #print(f"alphabet={alphabet}")
+    # #print(f"phrase={phrase}")
+    ##print(f"alphabet={alphabet}")
     #graph:
     #G.barplot(alphabet)
 
     new_alphabet = getFrequence(alphabet)
-    #print(f"new_alphabet={new_alphabet}")
+    ##print(f"new_alphabet={new_alphabet}")
 
     #G.barplot(new_alphabet)
 
     e = entropie(new_alphabet)
-    #print(f"Entropie = {e}")
+    ##print(f"Entropie = {e}")
 
     #~~~~~~~~
     #Encodage
     #~~~~~~~~
 
     liste_phrase_generique = list(phrase)
-    #print(f"liste_phrase={liste_phrase_generique}")
+    ##print(f"liste_phrase={liste_phrase_generique}")
 
     #sentence = "This is a beautiful day !"
     #liste_phrase = list(sentence)
-    liste_phrase = list(phrase)
+    liste_phrase = list(phrase[:200])
     huffman = Huffman(new_alphabet,liste_phrase_generique,liste_phrase)
     ret = huffman.encode()
-    #print(f"encodage={ret}")
+    ##print(f"encodage={ret}")
     liste_bin = byteToBin(ret)#phrase en binaire.
 
-    #print(f"Phrase             : {''.join(liste_phrase)}")
-    #print(f"Phrase en binaire  : {liste_bin}")
+    ##print(f"Phrase             : {''.join(liste_phrase)}")
+    ##print(f"Phrase en binaire  : {liste_bin}")
 
     codec = HuffmanCodec.from_data(getLivre('./The_Adventures_of_Sherlock_Holmes_A_Scandal_In_Bohemia.txt'))
-    #print(codec.print_code_table())
+    ##print(codec.#print_code_table())
 
     np_bin = np.array(list(liste_bin))
-    #print(f"np_bin = {type(np_bin)}")
-    #print(f"np_bin = {np_bin!r}")
+    ##print(f"np_bin = {type(np_bin)}")
+    ##print(f"np_bin = {np_bin!r}")
+
+    values = [
+        [4,7],
+        [11,15],
+        [26,31],
+        [57,63],
+        [120,127],
+        [247,255],
+        [502,511],
+        [1013,1023]
+    ]
+    for i in range(len(values)):
+        k,n = values[i]
+        try:
+            print(f"{i}/{len(values)} {datetime.now().strftime('%H:%M:%S')} - {k},{n}")
+
+            #k,n = (247,255) # EDIT
+
+            bourrage, nouveau_message_code = reshape(np_bin,k)
+
+            #sans codageCanal:
+            #print(f"matric message :{nouveau_message_code}")
+
+            """
+            ####
+            INTEGRERE GESTION DES ERREURS 
+            ####
+            """
+
+            ge = GestionErreur(k, n)
+            # genpoly => 1101b sert a generer le message codé. avec redondance codagecanal.
+            # fec_cycle constructeur codage canal [block.FECCyclic(genpoly)]
+            genpoly,fec_cycle = ge.genpoly()
+            #print(f"Polynome généré : {genpoly}")
+
+            nouveau_message_code_codage_canal = ge.codageCanal(nouveau_message_code,fec_cycle)#génère le message avec la redondance.
+            ##print(nouveau_message_code)
+
+            """
+            ####
+            FIN INTEGRERE GESTION DES ERREURS 
+            ####
+            """
+            array_error = nouveau_message_code
+            array_error_codage_canal = nouveau_message_code_codage_canal
+            nombre_erreur = 2
+            for i in range (0,nombre_erreur):
+                #Ajout des erreurs dans les messages.
+                array_error = addErrorToArray(array_error)
+
+                array_error_codage_canal = addErrorToArray(array_error_codage_canal)
+
+            """
+            ###
+            DECODAGE CANAL
+            ###
+            """
+            array_error_codage_canal_decode = ge.decodageCanal(array_error_codage_canal,fec_cycle)
+
+            """
+            ###
+            Fin DECODAGE CANAL
+            ###
+            """
+
+            #~~~~~~
+            #Decode
+            #~~~~~~
+
+            #message_decode = showDecodedMessage(array_error,bourrage)
+            ##print(f"Message décodé                               : {message_decode}")
+
+            message_decode_codage_canal = showDecodedMessage(array_error_codage_canal_decode,bourrage)
+
+            print(f"Message décodé passé par le codage canal: {message_decode_codage_canal[:200]}")
+        except Exception as e:
+            print(f"{i} - {k},{n}")
+            print("Erreur :(",e)
+
+        print("===========================================================")
 
 
-
-
-    k,n = (247,255) # EDIT
-
-    bourrage, nouveau_message_code = reshape(np_bin,k)
-
-    #sans codageCanal:
-    print(f"matric message :{nouveau_message_code}")
-
-    """
-    ####
-    INTEGRERE GESTION DES ERREURS 
-    ####
-    """
-
-    ge = GestionErreur(k, n)
-    # genpoly => 1101b sert a generer le message codé. avec redondance codagecanal.
-    # fec_cycle constructeur codage canal [block.FECCyclic(genpoly)]
-    genpoly,fec_cycle = ge.genpoly()
-    print(f"Polynome généré : {genpoly}")
-
-    nouveau_message_code_codage_canal = ge.codageCanal(nouveau_message_code,fec_cycle)#génère le message avec la redondance.
-    #print(nouveau_message_code)
-
-    """
-    ####
-    FIN INTEGRERE GESTION DES ERREURS 
-    ####
-    """
-
-    #Ajout des erreurs dans les messages.
-    array_error = addErrorToArray(nouveau_message_code)
-    array_error_codage_canal = addErrorToArray(nouveau_message_code_codage_canal)
-    # => Doubler le nombre d'erreur.
-    array_error_codage_canal = addErrorToArray(array_error_codage_canal)
-    #print(array_error)
-
-
-    """
-    ###
-    DECODAGE CANAL
-    ###
-    """
-    array_error_codage_canal_decode = ge.decodageCanal(array_error_codage_canal,fec_cycle)
-
-    """
-    ###
-    Fin DECODAGE CANAL
-    ###
-    """
-
-    #~~~~~~
-    #Decode
-    #~~~~~~
-
-    #message_decode = showDecodedMessage(array_error,bourrage)
-    #print(f"Message décodé                               : {message_decode}")
-
-    message_decode_codage_canal = showDecodedMessage(array_error_codage_canal_decode,bourrage)
-    print(f"Message décodé passé par le codage canal     : {message_decode_codage_canal}")
 
 
 
