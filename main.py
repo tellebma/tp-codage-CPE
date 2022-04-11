@@ -140,7 +140,7 @@ if __name__ == '__main__':
     # print(f"phrase={phrase}")
     #print(f"alphabet={alphabet}")
     #graph:
-    G.barplot(alphabet)
+    #G.barplot(alphabet)
 
     new_alphabet = getFrequence(alphabet)
     #print(f"new_alphabet={new_alphabet}")
@@ -148,7 +148,7 @@ if __name__ == '__main__':
     G.barplot(new_alphabet)
 
     e = entropie(new_alphabet)
-    #print(f"Entropie = {e}")
+    print(f"Entropie = {e}")#nb de bit moyen codage.
 
     #~~~~~~~~
     #Encodage
@@ -158,7 +158,7 @@ if __name__ == '__main__':
 
     # ~~~~~~~~~~
     # Pour réduire le temps d'exec
-    phrase = phrase[: 500]  # prend les 200 premier char.
+    phrase = phrase[: 200]  # prend les 200 premier char.
     # ~~~~~~~~~~
 
     #print(f"liste_phrase={liste_phrase_generique}")
@@ -175,7 +175,7 @@ if __name__ == '__main__':
     #print(f"Phrase en binaire  : {liste_bin}")
 
     codec = HuffmanCodec.from_data(getLivre('./The_Adventures_of_Sherlock_Holmes_A_Scandal_In_Bohemia.txt'))
-    #print(codec.print_code_table())
+    print(codec.print_code_table())
 
     np_bin = np.array(list(liste_bin))
     #print(f"np_bin = {type(np_bin)}")
@@ -183,18 +183,18 @@ if __name__ == '__main__':
 
 
 
-    k,n = (247,255) # EDIT
+    k,n = (4,7) # EDIT
 
     bourrage, nouveau_message_code = reshape(np_bin,k)
 
     #sans codageCanal:
-    print(f"matric message :{nouveau_message_code}")
+    print(f"matric message :{nouveau_message_code[0:4]}")#on affiche seulement les 4 premiers ca ne sert a rien d'etre spammé inutilement.
 
-    """
+
     ####
-    INTEGRERE GESTION DES ERREURS 
+    #INTEGRERE Codage Canal
     ####
-    """
+
 
     ge = GestionErreur(k, n)
     # genpoly => 1101b sert a generer le message codé. avec redondance codagecanal.
@@ -205,65 +205,67 @@ if __name__ == '__main__':
     nouveau_message_code_codage_canal = ge.codageCanal(nouveau_message_code,fec_cycle)#génère le message avec la redondance.
     #print(nouveau_message_code)
 
-    """
+
     ####
-    FIN INTEGRERE GESTION DES ERREURS 
+    #FIN INTEGRERE Codage Canal
     ####
-    """
+
+    #~~~~
+    #Ajout erreur
+    #~~~~
 
     #Ajout des erreurs dans les messages.
-    array_error = addErrorToArray(nouveau_message_code)
-    array_error_codage_canal = addErrorToArray(nouveau_message_code_codage_canal)
-    # => Doubler le nombre d'erreur.
-    array_error_codage_canal = addErrorToArray(array_error_codage_canal)
-    #print(array_error)
+    array_error = nouveau_message_code
+    array_error_codage_canal = nouveau_message_code_codage_canal
+    #To edit.
+    nombre_erreur = 1 # test avec x nombres d'erreurs ajouté dans le code.
+    for i in range(0, nombre_erreur):
+        # Ajout des erreurs dans les messages.
+        array_error = addErrorToArray(array_error)
+        array_error_codage_canal = addErrorToArray(array_error_codage_canal)
 
-
-    """
     ###
-    DECODAGE CANAL
+    #DECODAGE CANAL
     ###
-    """
     array_error_codage_canal_decode = ge.decodageCanal(array_error_codage_canal,fec_cycle)
-
-    """
     ###
-    Fin DECODAGE CANAL
+    #Fin DECODAGE CANAL
     ###
-    """
 
     #~~~~~~
-    #Decode
+    #Decode huffman
     #~~~~~~
 
     message_decode = showDecodedMessage(array_error, bourrage)
-    # print(f"Message décodé                               : {message_decode}")
-
     message_decode_codage_canal = showDecodedMessage(array_error_codage_canal_decode, bourrage)
 
     #~~~~~~~~~~~~~~~~~~~~~~~
     #Interpretation resultat
     #~~~~~~~~~~~~~~~~~~~~~~~
 
-    backslashN = '\n'
+    backslashN = '\n'#var mise en forme text
+
+
+    taux = ge.tauxErreur(phrase, message_decode_codage_canal)
+    print("******************")
     print("Avec Codage Canal:")
     print(end="    ")  # useless mise en forme terminal.
     print(f"Message décodé passé par le codage canal: {message_decode_codage_canal[:20].replace(backslashN, '/n')}")
-    taux = ge.tauxErreur(phrase, message_decode_codage_canal)
-
     print(end="    ")
     print(f"Il y a eu un taux d'erreur de : {taux['%erreur'] * 100}% et donc un taux de ressemblance de {taux['%ressemblance'] * 100}%")
-    print(end="    ")
-    print(taux)
+    #print(end="    ")
+    #print(taux,end="\n\n")
+    print()
 
-    print("Sans Codage Canal:")
-    print(end="    ")
-    print(f"Message décodé: {message_decode[:20].replace(backslashN, '/n')}")
     taux = ge.tauxErreur(phrase, message_decode)
+    print("******************")
+    print("Sans Codage Canal:")
+    print(end="    ");
+    print(f"Message décodé: {message_decode[:20].replace(backslashN, '/n')}")
     print(end="    ")
     print(f"Il y a eu un taux d'erreur de : {taux['%erreur'] * 100}% et donc un taux de ressemblance de {taux['%ressemblance'] * 100}%")
     print(end="    ")
-    print(taux)
+    #print(taux)
 
 
 
