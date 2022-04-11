@@ -140,12 +140,12 @@ if __name__ == '__main__':
     # print(f"phrase={phrase}")
     #print(f"alphabet={alphabet}")
     #graph:
-    #G.barplot(alphabet)
+    G.barplot(alphabet)
 
     new_alphabet = getFrequence(alphabet)
     #print(f"new_alphabet={new_alphabet}")
 
-    #G.barplot(new_alphabet)
+    G.barplot(new_alphabet)
 
     e = entropie(new_alphabet)
     #print(f"Entropie = {e}")
@@ -155,6 +155,12 @@ if __name__ == '__main__':
     #~~~~~~~~
 
     liste_phrase_generique = list(phrase)
+
+    # ~~~~~~~~~~
+    # Pour réduire le temps d'exec
+    phrase = phrase[: 500]  # prend les 200 premier char.
+    # ~~~~~~~~~~
+
     #print(f"liste_phrase={liste_phrase_generique}")
 
     #sentence = "This is a beautiful day !"
@@ -174,7 +180,6 @@ if __name__ == '__main__':
     np_bin = np.array(list(liste_bin))
     #print(f"np_bin = {type(np_bin)}")
     #print(f"np_bin = {np_bin!r}")
-
 
 
 
@@ -231,11 +236,34 @@ if __name__ == '__main__':
     #Decode
     #~~~~~~
 
-    #message_decode = showDecodedMessage(array_error,bourrage)
-    #print(f"Message décodé                               : {message_decode}")
+    message_decode = showDecodedMessage(array_error, bourrage)
+    # print(f"Message décodé                               : {message_decode}")
 
-    message_decode_codage_canal = showDecodedMessage(array_error_codage_canal_decode,bourrage)
-    print(f"Message décodé passé par le codage canal     : {message_decode_codage_canal}")
+    message_decode_codage_canal = showDecodedMessage(array_error_codage_canal_decode, bourrage)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~
+    #Interpretation resultat
+    #~~~~~~~~~~~~~~~~~~~~~~~
+
+    backslashN = '\n'
+    print("Avec Codage Canal:")
+    print(end="    ")  # useless mise en forme terminal.
+    print(f"Message décodé passé par le codage canal: {message_decode_codage_canal[:20].replace(backslashN, '/n')}")
+    taux = ge.tauxErreur(phrase, message_decode_codage_canal)
+
+    print(end="    ")
+    print(f"Il y a eu un taux d'erreur de : {taux['%erreur'] * 100}% et donc un taux de ressemblance de {taux['%ressemblance'] * 100}%")
+    print(end="    ")
+    print(taux)
+
+    print("Sans Codage Canal:")
+    print(end="    ")
+    print(f"Message décodé: {message_decode[:20].replace(backslashN, '/n')}")
+    taux = ge.tauxErreur(phrase, message_decode)
+    print(end="    ")
+    print(f"Il y a eu un taux d'erreur de : {taux['%erreur'] * 100}% et donc un taux de ressemblance de {taux['%ressemblance'] * 100}%")
+    print(end="    ")
+    print(taux)
 
 
 

@@ -1,6 +1,8 @@
 """
 Main TP codage.
 """
+import traceback
+
 import matplotlib.pyplot as plt
 from scipy.stats import entropy
 from dahuffman import HuffmanCodec
@@ -157,11 +159,17 @@ if __name__ == '__main__':
     #~~~~~~~~
 
     liste_phrase_generique = list(phrase)
+
+    # ~~~~~~~~~~
+    # Pour réduire le temps d'exec
+    phrase = phrase[: 500] #prend les 200 premier char.
+    # ~~~~~~~~~~
+
     ##print(f"liste_phrase={liste_phrase_generique}")
 
     #sentence = "This is a beautiful day !"
     #liste_phrase = list(sentence)
-    liste_phrase = list(phrase[:200])
+    liste_phrase = list(phrase)
     huffman = Huffman(new_alphabet,liste_phrase_generique,liste_phrase)
     ret = huffman.encode()
     ##print(f"encodage={ret}")
@@ -190,7 +198,7 @@ if __name__ == '__main__':
     for i in range(len(values)):
         k,n = values[i]
         try:
-            print(f"{i}/{len(values)} {datetime.now().strftime('%H:%M:%S')} - {k},{n}")
+            print(f">{i}/{len(values)} {datetime.now().strftime('%H:%M:%S')} - {k},{n}")
 
             #k,n = (247,255) # EDIT
 
@@ -245,17 +253,40 @@ if __name__ == '__main__':
             #Decode
             #~~~~~~
 
-            #message_decode = showDecodedMessage(array_error,bourrage)
-            ##print(f"Message décodé                               : {message_decode}")
+            message_decode = showDecodedMessage(array_error,bourrage)
+            #print(f"Message décodé                               : {message_decode}")
+
 
             message_decode_codage_canal = showDecodedMessage(array_error_codage_canal_decode,bourrage)
 
-            print(f"Message décodé passé par le codage canal: {message_decode_codage_canal[:200]}")
+            backslashN = '\n'
+            print("Avec Codage Canal:")
+            print(end="    ")# useless mise en forme terminal.
+            print(f"Message décodé passé par le codage canal: {message_decode_codage_canal[:20].replace(backslashN, '/n')}")
+            taux = ge.tauxErreur(phrase,message_decode_codage_canal)
+
+            print(end="    ")
+            print(f"Il y a eu un taux d'erreur de : {taux['%erreur']*100}% et donc un taux de ressemblance de {taux['%ressemblance']*100}%")
+            print(end="    ")
+            print(taux)
+
+            print("Sans Codage Canal:")
+            print(end="    ")
+            print(f"Message décodé: {message_decode[:20].replace(backslashN, '/n')}")
+            taux = ge.tauxErreur(phrase, message_decode)
+            print(end="    ")
+            print(
+                f"Il y a eu un taux d'erreur de : {taux['%erreur'] * 100}% et donc un taux de ressemblance de {taux['%ressemblance'] * 100}%")
+            print(end="    ")
+            print(taux)
+
+
         except Exception as e:
             print(f"{i} - {k},{n}")
             print("Erreur :(",e)
-
-        print("===========================================================")
+            print(traceback.format_exc())
+        print(f"<{i}/{len(values)} {datetime.now().strftime('%H:%M:%S')} - {k},{n}")
+        print("**************************")
 
 
 
