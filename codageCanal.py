@@ -5,7 +5,7 @@ import numpy as np
 
 # https://pysdr.org/content/channel_coding.html
 
-class GestionErreur:
+class CodageCanal:
     def __init__(self, k, n):
         # fec_block.FECCyclic()
         self.k = k
@@ -13,12 +13,22 @@ class GestionErreur:
         pass
 
     def genpoly(self):
-        # init code gestion erreur  (1101)
+        """
+        génère un polynome
+        :return: polynome et FecCyclicObject
+        """
+        # init code codage canal  (1101)
         genpoly = format(cyclic_code_genpoly(self.n, self.k)[0], 'b')
 
         return genpoly, block.FECCyclic(genpoly)
 
     def codageCanal(self, matrice, fec_cyclic):
+        """
+
+        :param matrice: matrice
+        :param fec_cyclic: object
+        :return: matrice avec codage
+        """
         n_ligne_matrice = len(matrice)
         matrice = np.reshape(matrice, np.size(matrice)).astype(int)
         codewords = fec_cyclic.cyclic_encoder(matrice)
@@ -27,15 +37,27 @@ class GestionErreur:
         return matrice
 
     def decodageCanal(self,matrice,fec_cyclic):
+        """
+
+        :param matrice: matrice avec erreur
+        :param fec_cyclic: object
+        :return: matrice sans erreur (reconstitué)
+        """
         n_ligne_matrice = len(matrice)
         matrice = np.reshape(matrice, np.size(matrice))
         decoded_message = fec_cyclic.cyclic_decoder(matrice)
         return np.reshape(decoded_message, (n_ligne_matrice, self.k))
 
     def tauxErreur(self,phrase_sans_erreur,phrase_erreur):
+        """
+
+        :param phrase_sans_erreur:
+        :param phrase_erreur:
+        :return: dict
+        """
         tauxDErreur = {"%erreur":0,"%ressemblance":0}
-        phrase_sans_erreur = phrase_sans_erreur[:100]
-        phrase_erreur = phrase_erreur[:100]
+        phrase_sans_erreur = phrase_sans_erreur[:50000]
+        phrase_erreur = phrase_erreur[:50000]
         for i in range(len(phrase_sans_erreur)):
             if phrase_sans_erreur[i] == phrase_erreur[i]:
                 # pas d'erreur
