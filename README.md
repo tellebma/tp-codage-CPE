@@ -1,14 +1,14 @@
-# tp-codage-CPE
+# tp-codage-CPE BELLET METRA
 
 TP Codage réalisé a CPE Lyon:
 
-On peut réaliser l'exercice sur depuis 2 livres différents.   
-1 en français : ``L'infâme``  
+On peut réaliser l'exercice depuis 2 livres différents.   
+Un livre en français : ``L'infâme``  
 Et un second en anglais : ```The Adventures of Sherlock Holmes```.
-Pour changer ``main.py`` changer la ligne 137-138.
-``mainbis.py`` changer les lignes 141-142.
+Pour changer de livre ``main.py`` intervertir les lignes 137-138.
+``mainbis.py`` les lignes 141-142.
 
-2 scripts principaux : 
+Les 2 scripts principaux : 
 ```main.py``` et ```mainbis.py```
   
 ```main.py``` > Execute le codage et l'ajout d'erreur Une seul fois pour un `n` et un `k` donné. [#186]

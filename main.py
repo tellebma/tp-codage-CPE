@@ -268,7 +268,7 @@ if __name__ == '__main__':
     taux = cc.tauxErreur(phrase, message_decode)
     print("******************")
     print("Sans Codage Canal:")
-    print(end="    ");
+    print(end="    ")
     print(f"Message décodé: {message_decode[:20].replace(backslashN, '/n')}")
     print(end="    ")
     print(
